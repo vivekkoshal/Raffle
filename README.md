@@ -17,6 +17,13 @@ This code is to create a provable random smart contract lottery
 
 
 
+## Tests !
+
+1. Write some deploy scripts
+2. write our test
+   1. Work on local chain
+   2. work on forked testnet
+   3. forked Mainnet
 
 
 

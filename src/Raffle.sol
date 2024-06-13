@@ -69,7 +69,7 @@ contract Raffle is VRFConsumerBaseV2 {
     //Events
     event EnteredRaffle(address indexed player);   //indexed parapemeter are also called topics
     event PickedWinner(address indexed winner);
-
+    event RequestedRaffleWinner(uint256 indexed requestId);
 
     constructor (uint256 enteranceFee , uint256 interval , address vrfCoordinator , bytes32 gaslane , uint64 subscriptionId , uint32 callBackGasLimit) VRFConsumerBaseV2(vrfCoordinator) //as the interface also has inbulid constructor we can use it without defining the constructor for it
      {
@@ -134,7 +134,7 @@ contract Raffle is VRFConsumerBaseV2 {
 
 
    // function PickWinner() public { // name has to change to recgonisable by chain link node
-      function performUpkeep(bytes calldata /* p erformData */) external{
+    function performUpkeep(bytes calldata /* p erformData */) external{
         (bool upkeepNeeded, ) = checkUpkeep("");  //no need to pass checkData as we are not using it
 
         if(! upkeepNeeded){
@@ -159,7 +159,7 @@ contract Raffle is VRFConsumerBaseV2 {
 
         //copied from the cahinlink doc ->https://docs.chain.link/vrf/v2/subscription/examples/get-a-random-number
         //we make a request and it will can a specific contract called vrfCoordinator dfined in VRFCoordinatorV2Interface(only chain link node can respond to this request) then that contract will can rawfullfil random words in VRFConsumerBaseV2 which we will define by overridding it
-        i_vrfCOORDINATOR.requestRandomWords(       //chain link vrf coordinator address (every chain in which chainlink exsist(this adress is used to make call) has this value different)      //request random number is a function definded in cahil link interface
+        uint256 requestId = i_vrfCOORDINATOR.requestRandomWords(       //chain link vrf coordinator address (every chain in which chainlink exsist(this adress is used to make call) has this value different)      //request random number is a function definded in cahil link interface
             i_keyHash,                         //gas lane (we can spacifify how much gas we want to spend)  //this is also dependent on the cahin
             i_subscriptionId,                //id we funded with link           //this is also our specific id so its also defined in constructor
             c_REQUEST_CONFIRMATIONS ,           //requestConfirmations,    //number of block confirmations for the random number // in this for example we want 3 confirmations  //the more the number is more time it takes
@@ -167,11 +167,12 @@ contract Raffle is VRFConsumerBaseV2 {
             c_NUM_WORDS                        //number of random numbers we want(here we only want one)
         );  //it will return with our random fulfillrandomwords function
 
+        emit RequestedRaffleWinner(requestId);  //it is redudant(not needed) here as it is already emiting in the request random number function 
 
     }
 
         //this fuction is to get back the random numbers taken from cahin link docs
-    function fulfillRandomWords( uint256 /*_requestId*/, uint256[] memory _randomWords) internal override {   //if we overriding the function it must be spacified in an interface here (VRFConsumerBaseV2) as given in cahil link docs   //we also donot need the request id (it was comming from uint256 requestid = i_vrfCOORDINATOR.requestRandomWords)
+     function fulfillRandomWords( uint256 /*_requestId*/, uint256[] memory _randomWords) internal override {   //if we overriding the function it must be spacified in an interface here (VRFConsumerBaseV2) as given in cahil link docs   //we also donot need the request id (it was comming from uint256 requestid = i_vrfCOORDINATOR.requestRandomWords)
         //we will use mod function to pick a random number
         //for example there are 10 player s_players =10
         //and our random number is = 19347189348015891346584;
@@ -218,5 +219,15 @@ contract Raffle is VRFConsumerBaseV2 {
 
     function getPlayers(uint256 IndexofPlayer) external view returns(address){
         return s_players[IndexofPlayer];
+    }
+    
+    function getRecentWinner() external view returns(address){
+        return s_recentWinner;
+    }
+    function getLengthOfplayers() external view returns(uint256){
+        return s_players.length;
+    }
+    function getLastTimeStamp() external view returns(uint256){
+        return s_lastTimeStamp;
     }
 }

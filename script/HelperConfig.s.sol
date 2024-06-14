@@ -17,6 +17,7 @@ contract HelperConfig is Script{
         uint64 subscriptionId;
         uint32 callBackGasLimit;
         address Link;
+        uint256 deployerKey;
     }
 
     NetworkConfig public activeNetworkConfig;
@@ -34,13 +35,14 @@ contract HelperConfig is Script{
 
 
 
-    function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
-        return NetworkConfig({enteranceFee: 0.01 ether , interval: 30 , vrfCoordinator: 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625 , gaslane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c /**Key hash */ , subscriptionId: 0 /**will update this with our subID */, callBackGasLimit: 500000 , Link: 0x404460C6A5EdE2D891e8297795264fDe62ADBB75 });
+    function getSepoliaEthConfig() public view returns (NetworkConfig memory) {
+        return NetworkConfig({enteranceFee: 0.01 ether , interval: 30 , vrfCoordinator: 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625 , gaslane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c /**Key hash */ , subscriptionId: 1893 /**will update this with our subID */, callBackGasLimit: 500000 , Link: 0x404460C6A5EdE2D891e8297795264fDe62ADBB75 , deployerKey: 0x7ac3722a9d4906966d021dfe1536f82a9d778937ce18f3b3704f04b1ed116f39 /**this will take the private key from env file taken from our meta mask */});
 
-    }
+    } 
 
 
     //here we will create/Mock everthing using MockV3aggrigator
+    uint256 constant DEFAULT_PRIVATE_KEY =0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;  //his is taken from the anvil
     function getOrCreateAnvilConfig() public  returns (NetworkConfig memory) {
         if (activeNetworkConfig.vrfCoordinator != address(0)) {
             return activeNetworkConfig;
@@ -58,7 +60,7 @@ contract HelperConfig is Script{
         LinkToken link = new LinkToken();
         vm.stopBroadcast();
 
-        return NetworkConfig({enteranceFee: 0.01 ether , interval: 30 , vrfCoordinator: address(vrfCoordinatorMock) /**Main differnce */, gaslane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c /**Key hash - does not matter here*/ , subscriptionId: 0 /**our scipt will add this */, callBackGasLimit: 500000 , Link: address(link)});
+        return NetworkConfig({enteranceFee: 0.01 ether , interval: 30 , vrfCoordinator: address(vrfCoordinatorMock) /**Main differnce */, gaslane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c /**Key hash - does not matter here*/ , subscriptionId: 0 /**our scipt will add this */, callBackGasLimit: 500000 , Link: address(link) , deployerKey: DEFAULT_PRIVATE_KEY});
 
     }
 

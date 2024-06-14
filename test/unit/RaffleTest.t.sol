@@ -23,6 +23,7 @@ contract RaffleTest is Test {
     uint64 subscriptionId;
     uint32 callBackGasLimit;
     address Link;
+    uint256 deployerKey;
 
     //Events
     event EnteredRaffle(address indexed player);  //we have to redefine them as they not types like enum or struct
@@ -34,7 +35,7 @@ contract RaffleTest is Test {
         DeployRaffle deployer = new DeployRaffle();
         (raffle , helperConfig) = deployer.run();
 
-        ( enteranceFee, interval,vrfCoordinator,gaslane,subscriptionId,callBackGasLimit ,Link) = helperConfig.activeNetworkConfig();
+        ( enteranceFee, interval,vrfCoordinator,gaslane,subscriptionId,callBackGasLimit ,Link , deployerKey) = helperConfig.activeNetworkConfig();
         vm.deal(PLAYERS , STARTING_USER_BALANCE);
     }
 
@@ -205,13 +206,20 @@ contract RaffleTest is Test {
         Raffle.RaffleState rstate = raffle.getRaffleState();
         //assert
         assert(uint256(requestid) >0);  //by this we make sure that rquest id was generated
-        assert(uint256(rstate) == 1);
+        assert(uint256(rstate) == 1); 
     }
 
 
     //fullfilllRandomWords//
+    modifier skipFork (){
+        if(block.chainid  != 31337) {  //if chain id is not anvils id  31337 then revert
+        return;
+        }
+        _;
+    }
 
-    function testFulfilRandomWordsCanOnlyRunIfPerformUpkeepIsTrue(uint256 RandomRequestId) public RaffleEnteredAndTimePassed {
+
+    function testFulfilRandomWordsCanOnlyRunIfPerformUpkeepIsTrue(uint256 RandomRequestId) public RaffleEnteredAndTimePassed skipFork{
         //arrange
         //we will try that mock call fulfill random words and it fails
         vm.expectRevert("nonexistent request");
@@ -221,7 +229,7 @@ contract RaffleTest is Test {
     }
 
 
-    function testFulfillRandomWordPicksWinneerResetsAndSendMoney() public RaffleEnteredAndTimePassed{
+    function testFulfillRandomWordPicksWinneerResetsAndSendMoney() public RaffleEnteredAndTimePassed skipFork{
         //arrange
         uint256 additionalEntrants = 3;
         uint256 startingIndex =1 ;
@@ -256,6 +264,6 @@ contract RaffleTest is Test {
 
     }
 
-    
+
 
 }
